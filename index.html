@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #studentInfo {
+            text-align: left;
+        }
+
+        .studentInfoContainer {
+            margin: 10px;
+            padding: 10px;
+            /* border: 1px solid #ccc; */
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="studentInfo" class="studentInfoContainer"></div>
+
+    <script>
+        class Student {
+            constructor(name, address, phone, course) {
+                this.name = name;
+                this.address = address;
+                this.phone = phone;
+                this.course = course;
+            }
+
+            displayInfo() {
+                return `<div class="studentInfoContainer">
+                            <p><strong>Name:</strong> ${this.name}</p>
+                            <p><strong>Address:</strong> ${this.address}</p>
+                            <p><strong>Phone:</strong> ${this.phone}</p>
+                            <p><strong>Course:</strong> ${this.course}</p>
+                        </div>`;
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch('student_data.txt');
+                const data = await response.text();
+                return data;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        async function processStudentData() {
+            const rawData = await fetchData();
+            const studentDataArray = rawData.split('\n').filter(Boolean);
+
+            const students = [];
+            let currentStudentData = [];
+
+            for (const data of studentDataArray) {
+                currentStudentData.push(data);
+
+                if (currentStudentData.length === 4) {
+                    const [name, address, phone, course] = currentStudentData;
+                    const student = new Student(name, address, phone, course);
+                    students.push(student);
+                    currentStudentData = [];
+                }
+            }
+
+            return students;
+        }
+
+        async function displayStudents() {
+            const students = await processStudentData();
+            const studentInfoElement = document.getElementById('studentInfo');
+
+            students.forEach(student => {
+                studentInfoElement.innerHTML += student.displayInfo();
+            });
+        }
+
+        displayStudents();
+    </script>
+</body>
+</html>
